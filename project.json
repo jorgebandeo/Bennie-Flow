@@ -1,0 +1,224 @@
+{
+  "id": "bennie-flow",
+  "name": "Bennie Flow",
+  "repository": "https://github.com/jorgebandeo/Bennie-Flow",
+  "demo": "https://jorgebandeo.github.io/Bennie-Flow/",
+  "status": "MVP estático conceitual",
+  "phase": "Validação de interface, regras de negócio e arquitetura funcional",
+  "summary": "MVP estático de um sistema de gestão de pedidos, capacidade produtiva, BOM, materiais, recursos, cronograma, cotação, acompanhamento de produção e otimização de aproveitamento de folhas. O objetivo é validar as regras de negócio, a experiência de uso e os cálculos essenciais antes da evolução para uma aplicação persistente com backend Node.js e banco de dados.",
+  "problem": {
+    "context": "Operações de produção sob encomenda precisam transformar pedidos comerciais em necessidades reais de materiais, horas de trabalho, uso de equipamentos e datas possíveis de entrega. Quando esses controles ficam separados ou dependem de cálculos manuais, aumenta o risco de aceitar prazos impossíveis, perder material, esquecer etapas e ter pouca visibilidade sobre a capacidade futura.",
+    "need": "Centralizar pedido, cotação, estrutura do produto, estoque, recursos, tempos e programação da produção em um único fluxo visual.",
+    "practical_value": [
+      "Reduzir o tempo necessário para realizar uma cotação.",
+      "Evitar prometer datas menores que a capacidade real de produção.",
+      "Transformar um pedido confirmado em demanda de materiais e horas produtivas.",
+      "Permitir acompanhar produtos de um mesmo pedido que estejam em etapas diferentes.",
+      "Registrar defeitos, retrabalho e quantidade realmente concluída por produto.",
+      "Dar ao cliente uma visão simples e transparente de disponibilidade e prazo.",
+      "Melhorar o aproveitamento de matéria-prima em processos de impressão e corte."
+    ]
+  },
+  "mvp_scope": {
+    "current": "Aplicação frontend estática, executada no navegador e publicada pelo GitHub Pages. Os dados ainda são simulados e mantidos em memória, permitindo testar navegação, cálculos, componentes e regras de negócio sem dependência de servidor.",
+    "purpose": "O MVP serve para validar como o sistema deve funcionar antes de definir contratos de API, esquema definitivo do banco, regras transacionais e infraestrutura de produção.",
+    "not_yet_implemented": [
+      "Persistência real em banco de dados.",
+      "Autenticação e autorização de usuários.",
+      "API backend.",
+      "Transações de estoque e reservas concorrentes.",
+      "Integração real com sistemas de pagamento, transportadoras ou ERP.",
+      "Motor industrial de nesting executado em backend.",
+      "Histórico/auditoria persistente das mudanças de produção."
+    ]
+  },
+  "modules": [
+    {
+      "name": "Pedidos",
+      "purpose": "Registrar encomendas com múltiplos produtos, quantidade, imagem/referência específica e prazo desejado.",
+      "practical_use": "O pedido funciona como unidade comercial, mas cada produto possui seu próprio estado produtivo. Produtos na mesma etapa aparecem agrupados no mesmo card; quando um produto avança sozinho, o pedido se divide visualmente, e quando produtos voltam à mesma etapa, o agrupamento é reconstruído automaticamente.",
+      "knowledge": ["Modelagem de estado", "Fluxo de produção", "UI baseada em eventos", "Separação entre pedido e item de pedido"]
+    },
+    {
+      "name": "Fluxo de produção",
+      "purpose": "Acompanhar preparação, impressão, BOPP/laminação, corte, acabamento e conclusão.",
+      "practical_use": "Cada produto pode avançar ou recuar individualmente e o card atual também pode ser movido inteiro. A modelagem evita que um produto em outra etapa seja alterado acidentalmente.",
+      "knowledge": ["Máquina de estados", "Identidade de entidades", "Re-renderização de interface", "Drag and drop", "Interação touch"]
+    },
+    {
+      "name": "Cronograma de produção",
+      "purpose": "Organizar atividades considerando tempo disponível e processos paralelos.",
+      "practical_use": "A visualização usa dias úteis, horas produtivas e faixas paralelas de recursos. No desktop as tarefas podem ser arrastadas; no celular podem ser selecionadas ou movidas por toque prolongado.",
+      "knowledge": ["Planejamento de capacidade", "Calendário produtivo", "Paralelismo de operações", "Responsive UX", "Pointer Events"]
+    },
+    {
+      "name": "BOM e roteiro produtivo",
+      "purpose": "Representar de que materiais, operações e recursos cada produto precisa para existir.",
+      "practical_use": "O BOM contém materiais e quantidade consumida, enquanto o roteiro contém operações, recurso utilizado, tempo de preparação, tempo por lote e tamanho do lote. Recursos podem representar equipamentos ou atividades manuais, como preparo de arquivos, revisão de qualidade e preparo da caixa.",
+      "knowledge": ["Bill of Materials", "Routing", "MRP conceitual", "Tempos de setup", "Capacidade por recurso", "Modelagem de processos industriais"]
+    },
+    {
+      "name": "Materiais e estoque",
+      "purpose": "Relacionar produto, consumo, custo e disponibilidade de matéria-prima.",
+      "practical_use": "O protótipo permite cadastrar material, unidade, estoque, estoque mínimo e custo unitário. Esses dados alimentam cálculo de custo e podem futuramente gerar reserva e baixa automática ao confirmar/iniciar um pedido.",
+      "knowledge": ["Gestão de estoque", "Custo de materiais", "Reserva de estoque", "Ponto de reposição"]
+    },
+    {
+      "name": "Recursos e equipamentos",
+      "purpose": "Representar máquinas e trabalho manual que limitam a capacidade de produção.",
+      "practical_use": "Cada recurso possui processo, minutos disponíveis por dia, desgaste estimado e tempo de retorno/setup. Isso permite transformar o roteiro de um produto em ocupação real de agenda.",
+      "knowledge": ["Capacity planning", "Recursos restritivos", "Setup", "Disponibilidade produtiva", "Desgaste operacional"]
+    },
+    {
+      "name": "Cotação multi-produto",
+      "purpose": "Calcular um pedido comercial formado por vários produtos.",
+      "practical_use": "A cotação consolida quantidade, preço, custo estimado de materiais e tempo produtivo dos itens, preparando a base para informar uma primeira data segura de produção.",
+      "knowledge": ["Composição de custos", "Agregação de itens", "Precificação", "Estimativa de prazo"]
+    },
+    {
+      "name": "Portal do cliente",
+      "purpose": "Permitir que o próprio cliente consulte capacidade e prazo antes de concluir um pedido.",
+      "practical_use": "O cliente seleciona produtos, quantidades e data desejada. O sistema estima a carga produtiva usando o roteiro e apresenta uma resposta de disponibilidade sem expor detalhes internos da fábrica.",
+      "knowledge": ["Self-service", "Experiência do cliente", "Separação de contexto interno/externo", "Cálculo de capacidade"]
+    },
+    {
+      "name": "Defeitos e retrabalho",
+      "purpose": "Registrar perdas durante a produção sem tratar quantidade solicitada e quantidade boa como o mesmo valor.",
+      "practical_use": "Cada item possui quantidade, unidades boas e defeitos. Isso permite identificar quanto ainda precisa ser produzido e futuramente recalcular material e tempo adicionais de retrabalho.",
+      "knowledge": ["Controle de qualidade", "Yield", "Retrabalho", "Rastreabilidade por item"]
+    },
+    {
+      "name": "Nesting de artes",
+      "purpose": "Aumentar o número de peças produzidas por folha e reduzir desperdício em impressão e corte.",
+      "practical_use": "PNG transparente ou SVG é rasterizado em uma máscara de ocupação. O sistema mantém a proporção da peça, aplica distância de segurança, testa rotações e compara estratégias de compactação livre e padrões repetitivos deslocados para procurar mais peças por folha A4.",
+      "knowledge": ["2D irregular packing", "Nesting", "Máscara alfa", "Collision detection", "Heurísticas de otimização", "Lattice packing", "Rasterização", "Geometria computacional"]
+    }
+  ],
+  "technology": [
+    {
+      "tool": "HTML5",
+      "role": "Estrutura da aplicação e componentes sem dependência de framework.",
+      "applied_in_practice": "Foi usado para estruturar dashboard, pedidos, cotações, produção, cadastros, portal do cliente, diálogos e aba de nesting. O uso direto facilita validar rapidamente a semântica e os fluxos antes de escolher uma arquitetura frontend definitiva."
+    },
+    {
+      "tool": "CSS3",
+      "role": "Design system, layout responsivo e feedback visual.",
+      "applied_in_practice": "Grid, Flexbox, media queries, componentes de cards, popups, agenda, folhas de nesting e navegação mobile foram construídos manualmente. Isso permitiu experimentar uma interface branca/vermelho escuro com identidade visual suave e adaptar a experiência entre desktop e telefone."
+    },
+    {
+      "tool": "JavaScript Vanilla",
+      "role": "Estado, regras de negócio, cálculos e interação do MVP.",
+      "applied_in_practice": "O JavaScript controla pedidos, divisão automática por etapa, BOM, cotação, cálculo de tempo, agenda, drag-and-drop, toque prolongado, uploads, máscaras de imagem e algoritmos de nesting. A ausência inicial de framework reduz abstrações durante a validação das regras."
+    },
+    {
+      "tool": "Canvas API",
+      "role": "Leitura e processamento de imagens.",
+      "applied_in_practice": "PNG e SVG são desenhados em canvas para leitura do canal alfa. O conteúdo transparente é removido da análise e uma máscara binária representa somente a forma ocupada pela arte."
+    },
+    {
+      "tool": "SVG",
+      "role": "Formato vetorial de entrada e referência para produção gráfica.",
+      "applied_in_practice": "O MVP aceita SVG como arte de produto. Nesta fase ele é rasterizado para máscara; uma evolução prevista é trabalhar diretamente com paths e polígonos para nesting de maior precisão."
+    },
+    {
+      "tool": "Pointer Events / Drag and Drop API",
+      "role": "Interação com cronograma e fluxo produtivo.",
+      "applied_in_practice": "No desktop as atividades podem ser arrastadas. No celular foi implementado toque prolongado para iniciar a movimentação sem bloquear a rolagem normal da página."
+    },
+    {
+      "tool": "Web Audio API",
+      "role": "Feedback sonoro de interface.",
+      "applied_in_practice": "Sons curtos e suaves são sintetizados no navegador para confirmar clique, avanço, recuo e ações importantes sem depender de arquivos de áudio externos."
+    },
+    {
+      "tool": "Git e GitHub",
+      "role": "Versionamento, evolução incremental e publicação.",
+      "applied_in_practice": "Cada mudança do MVP é versionada em commits separados, permitindo testar hipóteses, corrigir regressões e preservar a evolução das regras de negócio."
+    },
+    {
+      "tool": "GitHub Pages",
+      "role": "Hospedagem da prova de conceito.",
+      "applied_in_practice": "O frontend estático é publicado diretamente para validação em navegador e dispositivos móveis. Parâmetros de versão nos arquivos JS/CSS são usados para reduzir problemas de cache durante testes rápidos."
+    },
+    {
+      "tool": "Node.js - planejado",
+      "role": "Backend da próxima fase.",
+      "applied_in_practice": "A arquitetura do MVP está sendo desenhada para migrar regras validadas para serviços de backend. Node deverá concentrar persistência, autenticação, cálculo de capacidade, transações de estoque e tarefas de otimização de maior custo computacional."
+    },
+    {
+      "tool": "Banco de dados relacional - planejado",
+      "role": "Persistência e integridade dos dados.",
+      "applied_in_practice": "A próxima fase precisa armazenar produtos, revisões de BOM, pedidos, itens, operações, recursos, estoque, agenda, defeitos e histórico. Relacionamentos e transações serão importantes para impedir inconsistências entre pedido, material reservado e capacidade."
+    }
+  ],
+  "applied_knowledge": [
+    {
+      "area": "Engenharia de software",
+      "examples": ["Separação de módulos", "Modelagem de entidades", "Estado derivado", "Identidade estável de itens", "Evolução incremental de MVP", "Tratamento de regressões"]
+    },
+    {
+      "area": "Arquitetura de sistemas",
+      "examples": ["Frontend de validação desacoplado do backend futuro", "Definição de fontes de verdade", "Separação entre domínio comercial e domínio produtivo", "Planejamento de API e persistência"]
+    },
+    {
+      "area": "Produção e operações",
+      "examples": ["BOM", "Roteiro de produção", "Capacidade", "Setup", "Produção paralela", "Retrabalho", "Defeitos", "Estoque e consumo"]
+    },
+    {
+      "area": "Algoritmos e otimização",
+      "examples": ["Packing 2D irregular", "Heurísticas", "Máscaras de colisão", "Busca multi-estratégia", "Padrões repetitivos", "Best-so-far"]
+    },
+    {
+      "area": "UX responsiva",
+      "examples": ["Desktop e mobile com comportamentos diferentes", "Área de toque", "Navegação inferior", "Popups responsivos", "Interação por toque prolongado"]
+    },
+    {
+      "area": "Computação gráfica",
+      "examples": ["Rasterização", "Canal alfa", "Máscara binária", "Rotação", "Transformação de coordenadas", "Visualização de layout"]
+    }
+  ],
+  "knowledge_acquired": [
+    "Diferença prática entre modelar estado por card e modelar estado por item de pedido.",
+    "Importância de derivar agrupamentos visuais a partir de uma fonte de verdade simples.",
+    "Limitações de heurísticas gulosas em problemas de nesting e necessidade de preservar best-so-far.",
+    "Impacto de cache e versionamento de assets em aplicações publicadas no GitHub Pages.",
+    "Diferenças de interação entre mouse, drag-and-drop tradicional e telas touch.",
+    "Como transformar BOM e roteiro em entradas para cálculo de capacidade e prazo.",
+    "Como atividades manuais também precisam ser tratadas como recursos produtivos limitados.",
+    "Como defeitos e retrabalho alteram simultaneamente consumo de matéria-prima, carga produtiva e prazo.",
+    "Uso de máscara alfa para aproximar geometria irregular de imagens PNG/SVG no navegador.",
+    "Necessidade futura de algoritmos como No-Fit Polygon ou No-Fit Raster para nesting industrial mais preciso."
+  ],
+  "architecture_direction": {
+    "frontend": "Interface web responsiva, possivelmente componentizada em uma fase posterior.",
+    "backend": "Node.js com serviços de domínio para pedidos, BOM, estoque, capacidade, agenda, cotação e nesting.",
+    "database": "Banco relacional para garantir integridade entre entidades e suportar histórico/auditoria.",
+    "core_entities": ["Customer", "Order", "OrderItem", "Product", "ProductRevision", "BOMItem", "Operation", "Resource", "Material", "InventoryTransaction", "ProductionTask", "Defect", "Rework", "Quote"],
+    "important_rules": [
+      "Uma data prometida só pode ser aceita quando materiais e capacidade permitirem.",
+      "BOM e roteiro devem possuir revisão para não alterar retroativamente pedidos existentes.",
+      "Confirmação de pedido deve reservar materiais e capacidade de forma transacional.",
+      "Defeito deve gerar necessidade adicional apenas para a quantidade afetada.",
+      "Produtos de um pedido podem seguir etapas produtivas diferentes sem perder vínculo com o pedido original.",
+      "O cliente deve visualizar disponibilidade sem acessar informações internas sensíveis da programação."
+    ]
+  },
+  "next_steps": [
+    "Definir esquema relacional e versionamento de BOM/roteiro.",
+    "Criar API Node.js e mover regras de domínio para o backend.",
+    "Implementar autenticação e perfis de cliente, produção e administração.",
+    "Persistir pedidos, estoque, recursos e cronograma.",
+    "Criar mecanismo de reserva de estoque e capacidade.",
+    "Gerar automaticamente tarefas da agenda a partir das operações do BOM.",
+    "Adicionar auditoria das movimentações e defeitos.",
+    "Evoluir o nesting para geometria vetorial/NFP ou solução industrial equivalente.",
+    "Criar testes unitários para cálculos de BOM, prazo, capacidade e movimentação de pedidos.",
+    "Adicionar integração futura com ERP, emissão fiscal ou logística conforme necessidade operacional."
+  ],
+  "portfolio": {
+    "categories": ["Engenharia de Software", "Arquitetura", "Front-end", "Gestão de Produção", "Otimização", "Computação Gráfica", "Experiência Aplicada"],
+    "keywords": ["JavaScript", "HTML", "CSS", "Node.js", "BOM", "MRP", "Capacity Planning", "Scheduling", "Inventory", "Nesting", "2D Packing", "Canvas", "SVG", "Responsive Design", "GitHub Pages"],
+    "project_type": "Projeto aplicado / MVP de sistema de gestão e otimização produtiva",
+    "highlight": "Projeto que combina engenharia de software, modelagem de processos industriais, planejamento de capacidade e otimização geométrica em uma interface criada para validar regras reais de operação antes da implementação completa do backend."
+  }
+}
