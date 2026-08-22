@@ -1,46 +1,39 @@
 (()=>{
  const stages=['Preparação','Impressão','BOPP','Corte','Acabamento','Pronto'];
- const stageOf=o=>o.flowStage||'Preparação';
- const itemStage=(o,i)=>i.status||stageOf(o);
- function summary(o,onlyAttached=false){
-  const list=onlyAttached?o.items.filter(i=>!i.detached):o.items;
-  return list.map(i=>`<div class="summary-product"><span>${i.product}</span><b>${i.qty} un.</b></div>`).join('')||'<small class="empty-attached">todos os produtos estão separados</small>';
+ const normalizeStage=s=>stages.includes(s)?s:(s==='Arte'?'Preparação':'Preparação');
+ function ensureBranches(order){
+  if(order._branchesReady)return;
+  order.items.forEach((item,index)=>{item.branchId='main';item.status=normalizeStage(item.status)});
+  order.branches=[{id:'main',label:'Principal',stage:'Preparação'}];
+  order._branchesReady=true;
  }
- function cardsForStage(stage){
-  const cards=[];
-  orders.forEach(o=>{
-   const attached=o.items.filter(i=>!i.detached);
-   if(attached.length&&stageOf(o)===stage){
-    cards.push(`<article class="compact-order-card organic-order main-flow-card" draggable="true" data-order="${o.id}" data-type="order"><div class="compact-order-heading"><div><b>${o.id}</b><small>${o.client}</small></div><span>›</span></div><div class="compact-product-list">${summary(o,true)}</div>${o.items.some(i=>i.detached)?'<small class="split-badge">parte do pedido segue separada</small>':''}</article>`);
-   }
-   o.items.forEach((i,n)=>{
-    if(i.detached&&itemStage(o,i)===stage){
-     cards.push(`<article class="split-product-card" draggable="true" data-order="${o.id}" data-index="${n}" data-type="item"><div class="split-origin"><span>${o.id}</span><small>${o.client}</small></div><b>${i.product}</b><div class="split-meta"><span>${i.qty} un.</span>${i.rework?`<span class="rework-pill">↺ ${i.rework.qty} retrabalho</span>`:'<span>separado</span>'}</div><button type="button" class="open-split">Abrir produto</button></article>`);
-    }
-   });
-  });
-  return cards.join('')||'<div class="stage-empty">Sem itens nesta etapa</div>';
- }
+ function branchItems(order,branchId){return order.items.filter(i=>i.branchId===branchId)}
+ function getBranch(order,branchId){ensureBranches(order);return order.branches.find(b=>b.id===branchId)}
+ function nextBranchId(order){let n=1;while(order.branches.some(b=>b.id==='parte'+n))n++;return 'parte'+n}
+ function cardProducts(items){return items.map(i=>`<div class="summary-product"><span>${i.product}</span><b>${i.qty} un.</b></div>`).join('')}
+ function branchCard(order,branch){const items=branchItems(order,branch.id);return `<article class="compact-order-card branch-card" draggable="true" data-order="${order.id}" data-branch="${branch.id}"><div class="compact-order-heading"><div><b>${order.id}${branch.id==='main'?'':' · '+branch.label}</b><small>${order.client}</small></div><span>›</span></div><div class="compact-product-list">${cardProducts(items)}</div>${order.branches.length>1?`<small class="split-badge">${order.branches.length} partes do mesmo pedido</small>`:''}</article>`}
  function renderProduction(){
+  orders.forEach(ensureBranches);
   const board=document.getElementById('productionBoard');if(!board)return;
   board.className='production-board organic-flow-board';
-  board.innerHTML=`<div class="flow-sequence-head">${stages.map((s,i)=>`<div><span>${i+1}</span><b>${s}</b>${i<stages.length-1?'<i>→</i>':''}</div>`).join('')}</div><div class="flow-columns">${stages.map(stage=>`<section class="process-column organic-col" data-stage="${stage}"><div class="process-col-head"><b>${stage}</b><span>${countStage(stage)}</span></div><div class="organic-drop">${cardsForStage(stage)}</div></section>`).join('')}</div>`;
-  board.querySelectorAll('.organic-order').forEach(c=>{c.addEventListener('click',()=>openFlow(c.dataset.order));c.addEventListener('dragstart',e=>{e.dataTransfer.setData('application/x-order',c.dataset.order)})});
-  board.querySelectorAll('.split-product-card').forEach(c=>{c.querySelector('.open-split').onclick=e=>{e.stopPropagation();openFlow(c.dataset.order,+c.dataset.index)};c.addEventListener('click',()=>openFlow(c.dataset.order,+c.dataset.index));c.addEventListener('dragstart',e=>{e.dataTransfer.setData('application/x-item',`${c.dataset.order}|${c.dataset.index}`)})});
-  board.querySelectorAll('.organic-col').forEach(col=>{col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('flow-drop-target')});col.addEventListener('dragleave',()=>col.classList.remove('flow-drop-target'));col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('flow-drop-target');const stage=col.dataset.stage,itemData=e.dataTransfer.getData('application/x-item'),orderId=e.dataTransfer.getData('application/x-order');if(itemData){const [oid,n]=itemData.split('|'),o=orders.find(x=>x.id===oid);if(o&&o.items[+n]){o.items[+n].detached=true;o.items[+n].status=stage}}else if(orderId){const o=orders.find(x=>x.id===orderId);if(o){o.flowStage=stage;o.items.filter(i=>!i.detached).forEach(i=>i.status=stage)}}renderProduction()})})
+  board.innerHTML=`<div class="flow-sequence-head">${stages.map((s,i)=>`<div><span>${i+1}</span><b>${s}</b>${i<stages.length-1?'<i>→</i>':''}</div>`).join('')}</div><div class="flow-columns">${stages.map(stage=>`<section class="process-column organic-col" data-stage="${stage}"><div class="process-col-head"><b>${stage}</b><span>${orders.reduce((n,o)=>n+o.branches.filter(b=>b.stage===stage).length,0)}</span></div><div class="organic-drop">${orders.flatMap(o=>o.branches.filter(b=>b.stage===stage).map(b=>branchCard(o,b))).join('')||'<div class="stage-empty">Sem pedidos nesta etapa</div>'}</div></section>`).join('')}</div>`;
+  board.querySelectorAll('.branch-card').forEach(card=>{
+   card.addEventListener('click',()=>openBranch(card.dataset.order,card.dataset.branch));
+   card.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',`${card.dataset.order}|${card.dataset.branch}`));
+  });
+  board.querySelectorAll('.organic-col').forEach(col=>{col.addEventListener('dragover',e=>e.preventDefault());col.addEventListener('drop',e=>{e.preventDefault();const [oid,bid]=(e.dataTransfer.getData('text/plain')||'|').split('|'),o=orders.find(x=>x.id===oid),b=o&&getBranch(o,bid);if(b){b.stage=col.dataset.stage;branchItems(o,b.id).forEach(i=>i.status=b.stage);renderProduction()}})})
  }
- function countStage(stage){let n=0;orders.forEach(o=>{if(o.items.some(i=>!i.detached)&&stageOf(o)===stage)n++;n+=o.items.filter(i=>i.detached&&itemStage(o,i)===stage).length});return n}
- function openFlow(id,focusIndex=null){
-  const o=orders.find(x=>x.id===id),dlg=document.getElementById('orderDetailsDialog');if(!o||!dlg)return;
-  document.getElementById('orderDetailsTitle').textContent=`${o.id} · ${o.client}`;
-  document.getElementById('orderDetailsSummary').innerHTML=`<div class="order-popup-headline"><span class="status">Fluxo principal: ${stageOf(o)}</span><b>Prazo ${o.due}</b></div>`;
-  document.getElementById('orderSplitHint').innerHTML='<div class="organic-hint"><b>Pedido unido por padrão</b><span>Separe somente o produto que precisar seguir diferente. Todos continuam visíveis no quadro e podem voltar a se juntar.</span></div>';
+ function renderPopup(order,focusBranch){
+  const dlg=document.getElementById('orderDetailsDialog');document.getElementById('orderDetailsTitle').textContent=`${order.id} · ${order.client}`;
+  document.getElementById('orderDetailsSummary').innerHTML=`<div class="order-popup-headline"><span class="status">${order.branches.length} parte${order.branches.length>1?'s':''} ativa${order.branches.length>1?'s':''}</span><b>Prazo ${order.due}</b></div>`;
+  document.getElementById('orderSplitHint').innerHTML='<div class="organic-hint"><b>Divisão real do pedido</b><span>O pedido começa como um único card. Ao separar um produto, nasce uma nova parte do mesmo pedido, que pode ficar em outra etapa e avançar de forma independente.</span></div>';
   const container=document.getElementById('orderDetailsProducts');
-  container.innerHTML=o.items.map((i,n)=>{const p=productByName(i.product),st=itemStage(o,i),idx=stages.indexOf(st);return `<article class="popup-product-card flow-product ${i.detached?'detached':''} ${focusIndex===n?'focused-product':''}" data-index="${n}"><img src="${p.image}" alt="${p.name}"><div class="popup-product-content"><div class="product-flow-top"><span class="tag">${i.detached?'SEPARADO':'JUNTO AO PEDIDO'}</span><span class="stage-pill">${st}</span></div><h3>${p.name}</h3><p>${p.description}</p><div class="popup-product-stats"><span>Quantidade<b>${i.qty}</b></span><span>Boas<b>${i.done}</b></span><span>Erradas<b>${i.waste}</b></span><span>Faltam boas<b>${Math.max(0,i.qty-i.done)}</b></span></div><div class="flow-actions"><button type="button" data-action="back" ${idx<=0?'disabled':''}>← Etapa anterior</button><button type="button" data-action="split">${i.detached?'Juntar ao pedido':'Separar produto'}</button><button type="button" data-action="next" ${idx>=stages.length-1?'disabled':''}>Próxima etapa →</button></div><div class="rework-row"><label>Qtd. retrabalho<input type="number" min="1" max="${i.qty}" value="${Math.max(1,Math.min(i.waste||1,i.qty))}"></label><label>Retornar para<select>${['Impressão','BOPP','Corte','Acabamento'].map(s=>`<option ${s===st?'selected':''}>${s}</option>`).join('')}</select></label><button type="button" data-action="rework">Criar retrabalho</button></div>${i.rework?`<div class="rework-note">↺ ${i.rework.qty} un. em retrabalho em ${i.rework.stage}. O saldo bom continua no fluxo atual.</div>`:''}</div></article>`}).join('');
-  container.querySelectorAll('.flow-product').forEach(card=>{const i=o.items[+card.dataset.index];card.querySelectorAll('[data-action]').forEach(btn=>btn.onclick=()=>{const action=btn.dataset.action,idx=stages.indexOf(itemStage(o,i));if(action==='split'){if(i.detached){i.detached=false;i.status=stageOf(o);i.rework=null}else{i.detached=true;i.status=itemStage(o,i)}}if(action==='next'&&idx<stages.length-1){i.detached=true;i.status=stages[idx+1]}if(action==='back'&&idx>0){i.detached=true;i.status=stages[idx-1]}if(action==='rework'){const qty=Math.max(1,Math.min(i.qty,+card.querySelector('.rework-row input').value||1)),stage=card.querySelector('.rework-row select').value;i.detached=true;i.rework={qty,stage};i.status=stage}syncOrder(o);renderProduction();openFlow(o.id,+card.dataset.index)})});
-  dlg.showModal();if(focusIndex!==null)setTimeout(()=>container.querySelector(`[data-index="${focusIndex}"]`)?.scrollIntoView({block:'nearest'}),0)
+  container.innerHTML=order.branches.map(branch=>`<section class="branch-popup ${branch.id===focusBranch?'focused-branch':''}" data-branch="${branch.id}"><div class="branch-popup-head"><div><span class="tag">${branch.id==='main'?'PEDIDO PRINCIPAL':branch.label.toUpperCase()}</span><h3>${branch.stage}</h3></div><div class="branch-step-actions"><button type="button" data-branch-action="back" ${stages.indexOf(branch.stage)<=0?'disabled':''}>← Voltar</button><button type="button" data-branch-action="next" ${stages.indexOf(branch.stage)>=stages.length-1?'disabled':''}>Concluir etapa →</button></div></div>${branchItems(order,branch.id).map((item,index)=>{const p=productByName(item.product);return `<article class="popup-product-card branch-product" data-item-index="${order.items.indexOf(item)}"><img src="${p.image}" alt="${p.name}"><div class="popup-product-content"><span class="tag">${p.id}</span><h3>${p.name}</h3><p>${p.description}</p><div class="popup-product-stats"><span>Quantidade<b>${item.qty}</b></span><span>Boas<b>${item.done}</b></span><span>Erradas<b>${item.waste}</b></span><span>Etapa<b>${branch.stage}</b></span></div><div class="flow-actions">${branchItems(order,branch.id).length>1?'<button type="button" data-item-action="split">Separar em nova parte</button>':''}${order.branches.length>1?'<button type="button" data-item-action="move">Mover para outra parte</button>':''}</div></div></article>`}).join('')}</section>`).join('');
+  container.querySelectorAll('.branch-popup').forEach(sec=>{const branch=getBranch(order,sec.dataset.branch);sec.querySelectorAll('[data-branch-action]').forEach(btn=>btn.onclick=()=>{const idx=stages.indexOf(branch.stage);if(btn.dataset.branchAction==='next'&&idx<stages.length-1)branch.stage=stages[idx+1];if(btn.dataset.branchAction==='back'&&idx>0)branch.stage=stages[idx-1];branchItems(order,branch.id).forEach(i=>i.status=branch.stage);renderProduction();renderPopup(order,branch.id)})});
+  container.querySelectorAll('.branch-product').forEach(card=>{const item=order.items[+card.dataset.itemIndex],current=getBranch(order,item.branchId);card.querySelectorAll('[data-item-action]').forEach(btn=>btn.onclick=()=>{if(btn.dataset.itemAction==='split'){const id=nextBranchId(order),label=`Parte ${order.branches.length+1}`;order.branches.push({id,label,stage:current.stage});item.branchId=id;renderProduction();renderPopup(order,id)}else if(btn.dataset.itemAction==='move'){const targets=order.branches.filter(b=>b.id!==current.id);if(!targets.length)return;const target=targets[0];item.branchId=target.id;item.status=target.stage;if(branchItems(order,current.id).length===0)order.branches=order.branches.filter(b=>b.id!==current.id);renderProduction();renderPopup(order,target.id)}})});
+  dlg.showModal();
  }
- function syncOrder(o){const attached=o.items.filter(i=>!i.detached);if(attached.length){const stagesAttached=[...new Set(attached.map(i=>itemStage(o,i)))];if(stagesAttached.length===1)o.flowStage=stagesAttached[0]}else{o.flowStage=stages[Math.min(...o.items.map(i=>stages.indexOf(itemStage(o,i))).filter(x=>x>=0))]||stageOf(o)}}
- window.renderProductionOrders=renderProduction;window.openProductionFlow=openFlow;
+ function openBranch(orderId,branchId){const o=orders.find(x=>x.id===orderId);if(!o)return;ensureBranches(o);renderPopup(o,branchId)}
+ window.renderProductionOrders=renderProduction;window.openProductionFlow=openBranch;
  setTimeout(renderProduction,0);
 })();
