@@ -1,108 +1,53 @@
 {
+  "$schema": "https://jorgebandeo.github.io/Portfolio/schema/project-v1.schema.json",
   "schemaVersion": 1,
   "project": {
     "id": "bennie-flow",
     "name": "Bennie Flow",
-    "subtitle": "MVP estático de gestão de pedidos, capacidade produtiva, BOM, estoque, cronograma, cotação e otimização de nesting.",
-    "status": "MVP estático conceitual",
+    "subtitle": "MVP de gestão de pedidos, capacidade produtiva, BOM, estoque, cronograma e cotação para uma operação gráfica.",
+    "status": "prototype",
     "date": "2026-08-22"
   },
-  "categories": [
-    "software",
-    "web",
-    "arquitetura",
-    "experiência aplicada",
-    "otimização",
-    "gestão de produção"
-  ],
-  "technologies": [
-    "HTML5",
-    "CSS3",
-    "JavaScript",
-    "Canvas API",
-    "SVG",
-    "Pointer Events",
-    "Web Audio API",
-    "GitHub Pages"
-  ],
-  "summary": "Projeto aplicado criado para validar, em um MVP frontend estático, a gestão integrada de pedidos, produtos, BOM, materiais, recursos, tempos produtivos, capacidade, cotação, cronograma, defeitos, retrabalho e aproveitamento de folhas. O objetivo é transformar pedidos comerciais em necessidades reais de materiais e tempo antes da evolução para uma aplicação persistente com backend Node.js e banco de dados.",
+  "categories": ["software", "web"],
+  "technologies": ["HTML5", "CSS3", "JavaScript", "Canvas API", "SVG", "Pointer Events", "GitHub Pages"],
+  "summary": "Projeto aplicado para validar, em um MVP frontend, a gestão integrada de pedidos, produtos, estrutura de materiais, recursos, tempos produtivos, capacidade, cotações, cronograma, retrabalho e aproveitamento de folhas em uma operação gráfica. A proposta é transformar pedidos comerciais em necessidades reais de material, tempo e disponibilidade antes da evolução para backend Node.js e banco relacional.",
   "development": [
-    "Modelagem do pedido como unidade comercial formada por múltiplos itens com estados produtivos independentes.",
-    "Fluxo visual em que produtos do mesmo pedido podem seguir etapas diferentes e voltar a se agrupar automaticamente quando chegam ao mesmo estágio.",
-    "Cronograma produtivo com processos paralelos, dias úteis, horas de trabalho, drag-and-drop no desktop e toque prolongado no mobile.",
-    "BOM com matérias-primas, consumo por unidade, custos e roteiro produtivo.",
-    "Roteiro com operações manuais e equipamentos, tempo de preparação, tempo por lote, tamanho do lote, desgaste e retorno/setup.",
-    "Cotação multi-produto consolidando quantidade, custo de materiais, preço e tempo produtivo.",
-    "Portal do cliente para consulta de disponibilidade e prazo com base na capacidade estimada.",
-    "Controle de defeitos e retrabalho por item do pedido.",
-    "Nesting de PNG/SVG por máscara alfa para reduzir desperdício em impressão e corte, com testes de rotação, compactação e padrões repetitivos.",
-    "Responsividade específica para desktop e dispositivos móveis."
+    {"title": "Pedidos e produção", "text": "Modelagem de pedidos com múltiplos itens, estados produtivos independentes, quantidades produzidas, perdas e retrabalho."},
+    {"title": "BOM, materiais e capacidade", "text": "Estrutura de produto e roteiro produtivo alimentam estimativas de consumo, custo, ocupação de recursos e disponibilidade."},
+    {"title": "Cronograma", "text": "Planejamento visual de operações considerando processos paralelos, precedências, dias úteis, horas de trabalho e recursos limitados."},
+    {"title": "Cotação", "text": "Cotação multi-produto consolida quantidade, custos de materiais, preço estimado, tempo produtivo e primeira data segura."},
+    {"title": "Nesting", "text": "Experimentos com PNG/SVG, Canvas e máscara alfa estudam aproveitamento de folhas e redução de desperdício em impressão e corte."},
+    {"title": "Evolução prevista", "text": "O protótipo está preparado conceitualmente para migração a uma aplicação com API Node.js, persistência relacional e regras de planejamento no backend."}
   ],
   "highlights": [
-    "MVP concebido para validar regras de negócio antes da implementação do backend.",
-    "Aplicação prática de BOM, routing, capacity planning, estoque, scheduling e retrabalho.",
-    "Uso de Canvas e máscara alfa para colisão e otimização geométrica.",
-    "Separação entre contexto interno de produção e visão simplificada para o cliente.",
-    "Arquitetura preparada conceitualmente para futura migração para Node.js e banco relacional."
+    "MVP para validação de regras de negócio de produção gráfica",
+    "BOM, estoque, capacidade e scheduling integrados conceitualmente",
+    "Cotação baseada em consumo e tempo produtivo",
+    "Controle de perdas e retrabalho",
+    "Nesting e otimização de aproveitamento de material",
+    "Interface responsiva para desktop e mobile"
   ],
-  "knowledge": {
-    "applied": [
-      "Engenharia de software",
-      "Arquitetura de sistemas",
-      "Modelagem de entidades e estado",
-      "Bill of Materials",
-      "MRP conceitual",
-      "Capacity planning",
-      "Scheduling",
-      "Gestão de estoque",
-      "Controle de qualidade",
-      "Responsive UX",
-      "Computação gráfica",
-      "2D irregular packing",
-      "Heurísticas de otimização"
-    ],
-    "acquired": [
-      "Importância de usar o item do pedido como fonte de verdade em fluxos produtivos divididos.",
-      "Como BOM e roteiro podem alimentar simultaneamente custo, estoque, capacidade e prazo.",
-      "Como operações manuais também devem ser tratadas como recursos produtivos limitados.",
-      "Impacto de defeitos e retrabalho sobre material, horas e cronograma.",
-      "Limitações de heurísticas gulosas em nesting e necessidade de preservar best-so-far.",
-      "Diferenças práticas de interação entre desktop e touch.",
-      "Uso de rasterização e canal alfa para aproximar geometria irregular no navegador."
-    ]
-  },
-  "architecture": {
-    "current": "Frontend estático sem persistência, utilizado como prova de conceito e ambiente de validação das regras.",
-    "plannedBackend": "Node.js",
-    "plannedDatabase": "Banco de dados relacional",
-    "futureEntities": [
-      "Customer",
-      "Order",
-      "OrderItem",
-      "Product",
-      "ProductRevision",
-      "BOMItem",
-      "Operation",
-      "Resource",
-      "Material",
-      "InventoryTransaction",
-      "ProductionTask",
-      "Defect",
-      "Rework",
-      "Quote"
-    ]
+  "caseStudy": {
+    "title": "Gestão integrada de pedidos e capacidade para produção gráfica",
+    "intro": "O projeto nasce da necessidade de conectar o pedido comercial ao que realmente acontece na produção: consumo de matéria-prima, sequência de processos, disponibilidade de recursos e prazo possível de entrega.",
+    "objective": "Validar visualmente as principais regras de gestão de pedidos e planejamento produtivo antes da implementação de um backend persistente.",
+    "implementation": "A versão atual utiliza dados simulados no navegador para representar pedidos, produtos, materiais, recursos, etapas de produção e cotações. O cronograma considera operações paralelas e dependências, enquanto módulos de BOM, estoque e nesting ajudam a estimar consumo e capacidade.",
+    "architecture": "Frontend responsivo → pedidos/cotações → BOM e roteiros → estoque e recursos → planejamento de capacidade → produção e retrabalho. Evolução planejada: API Node.js + banco relacional.",
+    "progress": "MVP conceitual navegável, usado como ambiente de validação de fluxo, regras de negócio e experiência do usuário antes da implementação do backend.",
+    "materials": ["HTML5", "CSS3", "JavaScript", "Canvas API", "SVG", "BOM", "Capacity Planning", "Scheduling", "Nesting"],
+    "results": ["Fluxo de pedidos demonstrável", "Cronograma visual", "Cotação consolidada", "Modelagem de BOM e recursos", "Simulação de perdas/retrabalho", "Protótipo de nesting"]
   },
   "links": {
     "repository": "https://github.com/jorgebandeo/Bennie-Flow",
     "demo": "https://jorgebandeo.github.io/Bennie-Flow/"
   },
-  "media": {
-    "gallery": []
-  },
+  "media": {"gallery": []},
   "portfolio": {
     "visible": true,
     "featured": true,
-    "order": 120,
-    "private": false
+    "order": 32,
+    "private": false,
+    "discovery": ["featured", "applied", "software", "architecture", "webmobile"],
+    "searchTerms": ["gráfica", "produção gráfica", "gestão de pedidos", "cotação", "BOM", "MRP", "capacity planning", "scheduling", "estoque", "nesting", "otimização", "Node.js", "planejamento de produção"]
   }
 }
