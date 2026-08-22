@@ -1,95 +1,21 @@
 (()=>{
   const $=id=>document.getElementById(id);
-  const lanes=[
-    {id:'print',label:'Impressão',kind:'impressao'},
-    {id:'bopp',label:'BOPP / Laminação',kind:'laminacao'},
-    {id:'cut',label:'Corte',kind:'corte'},
-    {id:'manual',label:'Acabamento',kind:'acabamento'}
-  ];
-  const workDays=[
-    ['Seg 24/08','2026-08-24'],['Ter 25/08','2026-08-25'],['Qua 26/08','2026-08-26'],['Qui 27/08','2026-08-27'],['Sex 28/08','2026-08-28'],
-    ['Seg 31/08','2026-08-31'],['Ter 01/09','2026-09-01'],['Qua 02/09','2026-09-02'],['Qui 03/09','2026-09-03'],['Sex 04/09','2026-09-04'],
-    ['Seg 07/09','2026-09-07'],['Ter 08/09','2026-09-08'],['Qua 09/09','2026-09-09'],['Qui 10/09','2026-09-10'],['Sex 11/09','2026-09-11'],
-    ['Seg 14/09','2026-09-14'],['Ter 15/09','2026-09-15'],['Qua 16/09','2026-09-16'],['Qui 17/09','2026-09-17'],['Sex 18/09','2026-09-18'],
-    ['Seg 21/09','2026-09-21'],['Ter 22/09','2026-09-22'],['Qua 23/09','2026-09-23'],['Qui 24/09','2026-09-24'],['Sex 25/09','2026-09-25'],
-    ['Seg 28/09','2026-09-28'],['Ter 29/09','2026-09-29'],['Qua 30/09','2026-09-30']
-  ];
+  const lanes=[{id:'print',label:'Impressão',kind:'impressao'},{id:'bopp',label:'BOPP / Laminação',kind:'laminacao'},{id:'cut',label:'Corte',kind:'corte'},{id:'manual',label:'Acabamento',kind:'acabamento'}];
+  const workDays=[['Seg 24/08','2026-08-24'],['Ter 25/08','2026-08-25'],['Qua 26/08','2026-08-26'],['Qui 27/08','2026-08-27'],['Sex 28/08','2026-08-28'],['Seg 31/08','2026-08-31'],['Ter 01/09','2026-09-01'],['Qua 02/09','2026-09-02'],['Qui 03/09','2026-09-03'],['Sex 04/09','2026-09-04'],['Seg 07/09','2026-09-07'],['Ter 08/09','2026-09-08'],['Qua 09/09','2026-09-09'],['Qui 10/09','2026-09-10'],['Sex 11/09','2026-09-11'],['Seg 14/09','2026-09-14'],['Ter 15/09','2026-09-15'],['Qua 16/09','2026-09-16'],['Qui 17/09','2026-09-17'],['Sex 18/09','2026-09-18'],['Seg 21/09','2026-09-21'],['Ter 22/09','2026-09-22'],['Qua 23/09','2026-09-23'],['Qui 24/09','2026-09-24'],['Sex 25/09','2026-09-25'],['Seg 28/09','2026-09-28'],['Ter 29/09','2026-09-29'],['Qua 30/09','2026-09-30']];
   const views={today:{title:'Agenda do próximo dia útil',count:1},'3days':{title:'Próximos 3 dias úteis',count:3},week:{title:'Semana de produção',count:5},'30days':{title:'Próximos 30 dias',count:15},'60days':{title:'Horizonte até 30 de setembro',count:28}};
-  const tasks=[
-    {id:'t1',date:'2026-08-24',lane:'print',start:0,duration:120,label:'Imprimir adesivos',order:'#1048',detail:'250 un · Luna Papelaria'},
-    {id:'t2',date:'2026-08-24',lane:'bopp',start:60,duration:90,label:'Aplicar BOPP',order:'#1047',detail:'300 un · Mimo & Co.'},
-    {id:'t3',date:'2026-08-24',lane:'cut',start:60,duration:120,label:'Cortar chaveiros',order:'#1046',detail:'120 un · Clara Studio'},
-    {id:'t4',date:'2026-08-24',lane:'manual',start:300,duration:90,label:'Conferir e montar',order:'#1048',detail:'80 un · Luna Papelaria'},
-    {id:'t5',date:'2026-08-25',lane:'print',start:30,duration:90,label:'Imprimir prints',order:'#1046',detail:'60 un · Clara Studio'},
-    {id:'t6',date:'2026-08-25',lane:'cut',start:30,duration:100,label:'Cortar adesivos',order:'#1047',detail:'300 un · Mimo & Co.'},
-    {id:'t7',date:'2026-08-25',lane:'bopp',start:180,duration:80,label:'Aplicar BOPP',order:'#1048',detail:'250 un · Luna Papelaria'},
-    {id:'t8',date:'2026-08-26',lane:'print',start:0,duration:120,label:'Imprimir adesivos',order:'#1045',detail:'400 un · Ateliê Nuvem'},
-    {id:'t9',date:'2026-08-26',lane:'manual',start:270,duration:120,label:'Finalizar pedido',order:'#1047',detail:'Mimo & Co.'},
-    {id:'t10',date:'2026-08-27',lane:'cut',start:240,duration:120,label:'Cortar chaveiros',order:'#1045',detail:'50 un · Ateliê Nuvem'},
-    {id:'t11',date:'2026-08-28',lane:'manual',start:90,duration:90,label:'Embalagem e conferência',order:'#1046',detail:'Clara Studio'}
-  ];
+  const tasks=[{id:'t1',date:'2026-08-24',lane:'print',start:0,duration:120,label:'Imprimir adesivos',order:'#1048',detail:'250 un · Luna Papelaria'},{id:'t2',date:'2026-08-24',lane:'bopp',start:60,duration:90,label:'Aplicar BOPP',order:'#1047',detail:'300 un · Mimo & Co.'},{id:'t3',date:'2026-08-24',lane:'cut',start:60,duration:120,label:'Cortar chaveiros',order:'#1046',detail:'120 un · Clara Studio'},{id:'t4',date:'2026-08-24',lane:'manual',start:300,duration:90,label:'Conferir e montar',order:'#1048',detail:'80 un · Luna Papelaria'},{id:'t5',date:'2026-08-25',lane:'print',start:30,duration:90,label:'Imprimir prints',order:'#1046',detail:'60 un · Clara Studio'},{id:'t6',date:'2026-08-25',lane:'cut',start:30,duration:100,label:'Cortar adesivos',order:'#1047',detail:'300 un · Mimo & Co.'},{id:'t7',date:'2026-08-25',lane:'bopp',start:180,duration:80,label:'Aplicar BOPP',order:'#1048',detail:'250 un · Luna Papelaria'},{id:'t8',date:'2026-08-26',lane:'print',start:0,duration:120,label:'Imprimir adesivos',order:'#1045',detail:'400 un · Ateliê Nuvem'},{id:'t9',date:'2026-08-26',lane:'manual',start:270,duration:120,label:'Finalizar pedido',order:'#1047',detail:'Mimo & Co.'},{id:'t10',date:'2026-08-27',lane:'cut',start:240,duration:120,label:'Cortar chaveiros',order:'#1045',detail:'50 un · Ateliê Nuvem'},{id:'t11',date:'2026-08-28',lane:'manual',start:90,duration:90,label:'Embalagem e conferência',order:'#1046',detail:'Clara Studio'}];
   let currentView='today';
-  const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
-  const snap=n=>Math.round(n/30)*30;
+  const coarse=window.matchMedia?.('(pointer: coarse)').matches||false;
+  const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));const snap=n=>Math.round(n/30)*30;
   function usefulToClock(min){min=clamp(min,0,480);const clock=min<=240?480+min:570+min;return `${String(Math.floor(clock/60)).padStart(2,'0')}:${String(clock%60).padStart(2,'0')}`}
   function clockToUseful(value){const [h,m]=value.split(':').map(Number),total=h*60+m;if(total<=720)return clamp(total-480,0,240);return clamp(total-570,240,480)}
-  function visibleDays(){return workDays.slice(0,views[currentView].count)}
-  function laneFor(id){return lanes.find(x=>x.id===id)||lanes[0]}
-
-  function renderSummary(){
-    const s=$('scheduleFocusSummary');
-    s.innerHTML=`<div class="focus-card urgent"><span>MODELO DE AGENDA</span><strong>4 processos em paralelo</strong><small>Impressão, BOPP, corte e acabamento podem ocupar o mesmo horário.</small></div><div class="focus-card"><span>EXPEDIENTE</span><strong>8h produtivas</strong><small>08:00–12:00 + 13:30–17:30 · segunda a sexta.</small></div><div class="focus-card"><span>EDIÇÃO</span><strong>Arraste ou clique</strong><small>Reposicione ou abra uma tarefa para ajustar horário, duração e processo.</small></div>`;
-  }
-
-  function taskHtml(t){
-    const lane=laneFor(t.lane),li=lanes.indexOf(lane);
-    return `<button type="button" class="parallel-task task-${lane.kind}" draggable="true" data-task="${t.id}" style="--lane:${li};--top:${t.start/480};--height:${t.duration/480}" title="Clique para editar"><b>${t.label}</b><span>${t.order}</span><small>${usefulToClock(t.start)}–${usefulToClock(t.start+t.duration)}</small><em>${t.detail}</em></button>`;
-  }
-
-  function render(){
-    const days=visibleDays(),grid=$('productionGrid');
-    $('scheduleRangeTitle').textContent=views[currentView].title;
-    $('capacitySummary').innerHTML='';
-    renderSummary();
-    grid.className=`production-grid parallel-calendar zoom-${currentView}`;
-    grid.innerHTML=`<div class="parallel-legend"><b>Agenda paralela de produção</b>${lanes.map(l=>`<span><i class="lane-dot lane-${l.id}"></i>${l.label}</span>`).join('')}</div><div class="parallel-scroll"><aside class="parallel-time"><div class="time-head"></div>${[0,60,120,180,240,300,360,420,480].map(m=>`<span style="top:calc(55px + ${m/480*560}px)">${usefulToClock(m)}</span>`).join('')}</aside><div class="parallel-days">${days.map(([label,date])=>`<section class="parallel-day" data-date="${date}"><header><b>${label}</b><small>8h úteis</small></header><div class="lane-heads">${lanes.map(l=>`<span>${l.label}</span>`).join('')}</div><div class="parallel-track">${lanes.map((l,i)=>`<div class="lane-bg" style="left:${i*25}%"></div>`).join('')}<div class="lunch-separator"><span>12:00 / 13:30</span></div>${tasks.filter(t=>t.date===date).map(taskHtml).join('')}</div></section>`).join('')}</div></div>`;
-    bind();
-  }
-
-  function bind(){
-    document.querySelectorAll('.parallel-task').forEach(card=>{
-      card.addEventListener('click',()=>openEditor(card.dataset.task));
-      card.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain',card.dataset.task);ev.dataTransfer.effectAllowed='move'});
-    });
-    document.querySelectorAll('.parallel-track').forEach(track=>{
-      track.addEventListener('dragover',ev=>{ev.preventDefault();track.classList.add('drag-target')});
-      track.addEventListener('dragleave',()=>track.classList.remove('drag-target'));
-      track.addEventListener('drop',ev=>{
-        ev.preventDefault();track.classList.remove('drag-target');
-        const task=tasks.find(t=>t.id===ev.dataTransfer.getData('text/plain'));if(!task)return;
-        const rect=track.getBoundingClientRect(),x=clamp(ev.clientX-rect.left,0,rect.width-1),y=clamp(ev.clientY-rect.top,0,rect.height);
-        task.date=track.closest('.parallel-day').dataset.date;
-        task.lane=lanes[Math.min(3,Math.floor(x/(rect.width/4)))].id;
-        task.start=clamp(snap(y/rect.height*480),0,480-task.duration);
-        render();
-      });
-    });
-  }
-
-  function ensureEditor(){
-    if($('scheduleTaskDialog'))return;
-    const dlg=document.createElement('dialog');dlg.id='scheduleTaskDialog';dlg.innerHTML=`<form method="dialog" class="modal schedule-task-modal"><div class="modal-head"><div><span class="tag">EDITAR TAREFA</span><h2 id="taskEditTitle">Tarefa</h2></div><button value="cancel" class="close">×</button></div><div class="form-grid"><label>Dia<select id="taskEditDate">${workDays.map(d=>`<option value="${d[1]}">${d[0]}</option>`).join('')}</select></label><label>Processo<select id="taskEditLane">${lanes.map(l=>`<option value="${l.id}">${l.label}</option>`).join('')}</select></label><label>Início<input id="taskEditStart" type="time" step="1800"></label><label>Duração<select id="taskEditDuration"><option value="30">30 min</option><option value="60">1h</option><option value="90">1h30</option><option value="120">2h</option><option value="180">3h</option><option value="240">4h</option></select></label></div><div class="modal-actions"><button value="cancel" class="ghost2">Cancelar</button><button id="saveTaskEdit" value="default" class="primary">Salvar alteração</button></div></form>`;document.body.appendChild(dlg);
-  }
-  function openEditor(id){
-    ensureEditor();const t=tasks.find(x=>x.id===id);if(!t)return;
-    $('taskEditTitle').textContent=`${t.label} · ${t.order}`;$('taskEditDate').value=t.date;$('taskEditLane').value=t.lane;$('taskEditStart').value=usefulToClock(t.start);$('taskEditDuration').value=String(t.duration);
-    $('saveTaskEdit').onclick=()=>{t.date=$('taskEditDate').value;t.lane=$('taskEditLane').value;t.duration=+$('taskEditDuration').value;t.start=clamp(snap(clockToUseful($('taskEditStart').value)),0,480-t.duration);setTimeout(render,0)};
-    $('scheduleTaskDialog').showModal();
-  }
-
-  function init(){
-    document.querySelectorAll('.zoom-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.zoom-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentView=b.dataset.zoom;render()}));
-    document.querySelectorAll('.zoom-btn').forEach(x=>x.classList.remove('active'));document.querySelector('.zoom-btn[data-zoom="today"]')?.classList.add('active');currentView='today';render();
-  }
+  const visibleDays=()=>workDays.slice(0,views[currentView].count);const laneFor=id=>lanes.find(x=>x.id===id)||lanes[0];
+  function renderSummary(){const s=$('scheduleFocusSummary');s.innerHTML=`<div class="focus-card urgent"><span>MODELO DE AGENDA</span><strong>4 processos em paralelo</strong><small>Impressão, BOPP, corte e acabamento podem ocupar o mesmo horário.</small></div><div class="focus-card"><span>EXPEDIENTE</span><strong>8h produtivas</strong><small>08:00–12:00 + 13:30–17:30 · segunda a sexta.</small></div><div class="focus-card"><span>EDIÇÃO</span><strong>${coarse?'Toque':'Arraste ou clique'}</strong><small>${coarse?'Toque em uma tarefa para editar horário, duração e processo.':'Reposicione ou abra uma tarefa para ajustar horário, duração e processo.'}</small></div>`}
+  function taskHtml(t){const lane=laneFor(t.lane),li=lanes.indexOf(lane);return `<button type="button" class="parallel-task task-${lane.kind}" ${coarse?'':'draggable="true"'} data-task="${t.id}" style="--lane:${li};--top:${t.start/480};--height:${t.duration/480}" aria-label="Editar ${t.label} ${t.order}"><b>${t.label}</b><span>${t.order}</span><small>${usefulToClock(t.start)}–${usefulToClock(t.start+t.duration)}</small><em>${t.detail}</em></button>`}
+  function render(){const days=visibleDays(),grid=$('productionGrid');$('scheduleRangeTitle').textContent=views[currentView].title;$('capacitySummary').innerHTML='';renderSummary();grid.className=`production-grid parallel-calendar zoom-${currentView}`;grid.innerHTML=`<div class="parallel-legend"><b>Agenda paralela de produção</b>${lanes.map(l=>`<span><i class="lane-dot lane-${l.id}"></i>${l.label}</span>`).join('')}</div><div class="parallel-scroll"><aside class="parallel-time"><div class="time-head"></div>${[0,60,120,180,240,300,360,420,480].map(m=>`<span style="top:calc(55px + ${m/480*560}px)">${usefulToClock(m)}</span>`).join('')}</aside><div class="parallel-days">${days.map(([label,date])=>`<section class="parallel-day" data-date="${date}"><header><b>${label}</b><small>8h úteis</small></header><div class="lane-heads">${lanes.map(l=>`<span>${l.label}</span>`).join('')}</div><div class="parallel-track">${lanes.map((l,i)=>`<div class="lane-bg" style="left:${i*25}%"></div>`).join('')}<div class="lunch-separator"><span>12:00 / 13:30</span></div>${tasks.filter(t=>t.date===date).map(taskHtml).join('')}</div></section>`).join('')}</div></div>`;bind()}
+  function bind(){document.querySelectorAll('.parallel-task').forEach(card=>{card.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openEditor(card.dataset.task)});if(!coarse)card.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain',card.dataset.task);ev.dataTransfer.effectAllowed='move'})});if(!coarse)document.querySelectorAll('.parallel-track').forEach(track=>{track.addEventListener('dragover',ev=>{ev.preventDefault();track.classList.add('drag-target')});track.addEventListener('dragleave',()=>track.classList.remove('drag-target'));track.addEventListener('drop',ev=>{ev.preventDefault();track.classList.remove('drag-target');const task=tasks.find(t=>t.id===ev.dataTransfer.getData('text/plain'));if(!task)return;const rect=track.getBoundingClientRect(),x=clamp(ev.clientX-rect.left,0,rect.width-1),y=clamp(ev.clientY-rect.top,0,rect.height);task.date=track.closest('.parallel-day').dataset.date;task.lane=lanes[Math.min(3,Math.floor(x/(rect.width/4)))].id;task.start=clamp(snap(y/rect.height*480),0,480-task.duration);render()})})}
+  function ensureEditor(){if($('scheduleTaskDialog'))return;const dlg=document.createElement('dialog');dlg.id='scheduleTaskDialog';dlg.innerHTML=`<form method="dialog" class="modal schedule-task-modal"><div class="modal-head"><div><span class="tag">EDITAR TAREFA</span><h2 id="taskEditTitle">Tarefa</h2></div><button value="cancel" class="close">×</button></div><div class="form-grid"><label>Dia<select id="taskEditDate">${workDays.map(d=>`<option value="${d[1]}">${d[0]}</option>`).join('')}</select></label><label>Processo<select id="taskEditLane">${lanes.map(l=>`<option value="${l.id}">${l.label}</option>`).join('')}</select></label><label>Início<input id="taskEditStart" type="time" step="1800"></label><label>Duração<select id="taskEditDuration"><option value="30">30 min</option><option value="60">1h</option><option value="90">1h30</option><option value="120">2h</option><option value="180">3h</option><option value="240">4h</option></select></label></div><div class="modal-actions"><button value="cancel" class="ghost2">Cancelar</button><button id="saveTaskEdit" value="default" class="primary">Salvar alteração</button></div></form>`;document.body.appendChild(dlg)}
+  function openEditor(id){ensureEditor();const t=tasks.find(x=>x.id===id);if(!t)return;$('taskEditTitle').textContent=`${t.label} · ${t.order}`;$('taskEditDate').value=t.date;$('taskEditLane').value=t.lane;$('taskEditStart').value=usefulToClock(t.start);$('taskEditDuration').value=String(t.duration);$('saveTaskEdit').onclick=()=>{t.date=$('taskEditDate').value;t.lane=$('taskEditLane').value;t.duration=+$('taskEditDuration').value;t.start=clamp(snap(clockToUseful($('taskEditStart').value)),0,480-t.duration);setTimeout(render,0)};$('scheduleTaskDialog').showModal()}
+  function init(){document.querySelectorAll('.zoom-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.zoom-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentView=b.dataset.zoom;render()}));document.querySelectorAll('.zoom-btn').forEach(x=>x.classList.remove('active'));document.querySelector('.zoom-btn[data-zoom="today"]')?.classList.add('active');currentView='today';render()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
