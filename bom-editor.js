@@ -1,0 +1,36 @@
+(()=>{
+ const get=()=>window.BennieManufacturing;
+ const uid=p=>p+Math.random().toString(36).slice(2,8);
+ const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+ function ensureDialog(){
+  if(document.getElementById('bomEditDialog'))return;
+  const d=document.createElement('dialog');d.id='bomEditDialog';d.innerHTML=`<form method="dialog" class="modal technical-dialog"><div class="modal-head"><div><span class="tag">EDITAR BOM</span><h2 id="bomEditTitle">Produto</h2></div><button value="cancel" class="close">×</button></div><div id="bomEditBody"></div><div class="modal-actions"><button value="cancel" class="ghost2">Cancelar</button><button type="button" id="bomEditSave" class="primary">Salvar alterações</button></div></form>`;document.body.appendChild(d)
+ }
+ function matOptions(state,sel){return state.materials.map(m=>`<option value="${m.id}" ${m.id===sel?'selected':''}>${m.name}</option>`).join('')}
+ function resOptions(state,sel){return state.resources.map(r=>`<option value="${r.id}" ${r.id===sel?'selected':''}>${r.name} · ${r.type==='manual'?'Manual':'Equipamento'}</option>`).join('')}
+ function addMat(root,state,b={}){root.insertAdjacentHTML('beforeend',`<div class="bom-builder-line edit-bom-line"><select data-edit-mat>${matOptions(state,b.material||state.materials[0]?.id)}</select><input data-edit-qty type="number" step="0.001" value="${b.qty??1}" placeholder="Consumo/un"><button type="button" class="ghost2" data-remove>×</button></div>`);root.lastElementChild.querySelector('[data-remove]').onclick=e=>e.currentTarget.parentElement.remove()}
+ function addOp(root,state,op={}){root.insertAdjacentHTML('beforeend',`<div class="op-builder-line edit-op-line"><input data-edit-op-name value="${op.name||''}" placeholder="Nome da operação"><select data-edit-op-res>${resOptions(state,op.resource||state.resources[0]?.id)}</select><label>Prep. min<input data-edit-op-setup type="number" min="0" value="${op.setupMin??5}"></label><label>Tempo/lote<input data-edit-op-run type="number" min="0" value="${op.runMin??15}"></label><label>Qtd. lote<input data-edit-op-batch type="number" min="1" value="${op.batchQty??100}"></label><button type="button" class="ghost2" data-remove>×</button></div>`);root.lastElementChild.querySelector('[data-remove]').onclick=e=>e.currentTarget.parentElement.remove()}
+ function editProduct(index){
+  const api=get();if(!api)return;const {state}=api,p=state.products[index];if(!p)return;ensureDialog();
+  const d=document.getElementById('bomEditDialog');document.getElementById('bomEditTitle').textContent=`${p.id} · ${p.name}`;
+  document.getElementById('bomEditBody').innerHTML=`<div class="form-grid"><label>Código<input id="ebCode" value="${p.id}"></label><label>Nome<input id="ebName" value="${p.name}"></label><label>Preço de venda<input id="ebPrice" type="number" step="0.01" value="${p.price}"></label><label>Trocar imagem<input id="ebImage" type="file" accept="image/*"></label></div><label>Descrição<textarea id="ebDesc" rows="2">${p.description||''}</textarea></label><div class="builder-section"><div class="builder-head"><div><span class="tag">MATERIAIS</span><b>Consumo por unidade</b></div><button type="button" class="ghost2" id="ebAddMat">＋ material</button></div><div id="ebMats"></div></div><div class="builder-section"><div class="builder-head"><div><span class="tag">OPERAÇÕES</span><b>Roteiro, recurso e tempo</b></div><button type="button" class="ghost2" id="ebAddOp">＋ operação</button></div><div id="ebOps"></div><small class="builder-note">Você pode usar recursos manuais ou equipamentos. Estes tempos alimentam capacidade, cronograma e prazo.</small></div>`;
+  const mats=document.getElementById('ebMats'),ops=document.getElementById('ebOps');(p.bom||[]).forEach(b=>addMat(mats,state,b));(p.operations||[]).forEach(op=>addOp(ops,state,op));if(!p.bom?.length)addMat(mats,state);if(!p.operations?.length)addOp(ops,state);
+  document.getElementById('ebAddMat').onclick=()=>addMat(mats,state);document.getElementById('ebAddOp').onclick=()=>addOp(ops,state);
+  let newImage='';document.getElementById('ebImage').onchange=e=>{const f=e.target.files?.[0];if(f)newImage=URL.createObjectURL(f)};
+  document.getElementById('bomEditSave').onclick=()=>{
+    p.id=document.getElementById('ebCode').value.trim()||p.id;p.name=document.getElementById('ebName').value.trim()||p.name;p.price=+document.getElementById('ebPrice').value||0;p.description=document.getElementById('ebDesc').value.trim();if(newImage)p.image=newImage;
+    p.bom=[...mats.querySelectorAll('.edit-bom-line')].map(r=>({material:r.querySelector('[data-edit-mat]').value,qty:+r.querySelector('[data-edit-qty]').value||0}));
+    p.operations=[...ops.querySelectorAll('.edit-op-line')].map(r=>({id:uid('op'),name:r.querySelector('[data-edit-op-name]').value.trim()||'Operação',resource:r.querySelector('[data-edit-op-res]').value,setupMin:+r.querySelector('[data-edit-op-setup]').value||0,runMin:+r.querySelector('[data-edit-op-run]').value||0,batchQty:Math.max(1,+r.querySelector('[data-edit-op-batch]').value||1)}));
+    d.close();refreshCards();
+  };
+  d.showModal()
+ }
+ function refreshCards(){
+  const api=get();if(!api)return;const {state,unitMaterialCost,productMinutes}=api;const cards=document.querySelectorAll('#bomBuilder .product-manage');cards.forEach((card,i)=>{const p=state.products[i];if(!p)return;const info=card.querySelector('div');if(!info)return;card.querySelector('img')?.setAttribute('src',p.image||'');const tag=info.querySelector('.tag');if(tag)tag.textContent=p.id;const h=info.querySelector('h3');if(h)h.textContent=p.name;const desc=info.querySelector('p');if(desc)desc.textContent=p.description||'';let edit=card.querySelector('[data-edit-bom]');if(!edit){edit=document.createElement('button');edit.type='button';edit.className='primary edit-bom-btn';edit.dataset.editBom=String(i);edit.textContent='Editar BOM';info.appendChild(edit)}edit.onclick=()=>editProduct(i);
+    const price=info.querySelector('.price-line');if(price)price.innerHTML=`<span>Custo material <b>${money(unitMaterialCost(p))}</b></span><span>Venda <b>${money(p.price)}</b></span>`;
+    const oldOps=info.querySelector('.operation-list');if(oldOps)oldOps.innerHTML=(p.operations||[]).map(op=>{const r=state.resources.find(x=>x.id===op.resource);return `<div><span>${op.name}<small>${r?.name||'Sem recurso'} · ${r?.type==='manual'?'Manual':'Equipamento'}</small></span><b>${op.setupMin}m prep + ${op.runMin}m/${op.batchQty} un</b></div>`}).join('');const total=info.querySelector('.total-time');if(total)total.innerHTML=`Exemplo 100 un: <b>${productMinutes(p,100)} min</b>`;
+    edit.onclick=()=>editProduct(i)
+  })
+ }
+ const observer=new MutationObserver(()=>refreshCards());const start=()=>{const root=document.getElementById('bomBuilder');if(root){observer.observe(root,{childList:true,subtree:true});refreshCards()}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();window.BennieBomEditor={editProduct,refreshCards};
+})();
